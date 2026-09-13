@@ -1,5 +1,7 @@
 security:
-    # enable_authenticator_manager: true
+    password_hashers:
+        App\Entity\User:
+            algorithm: bcrypt
 
     providers:
         app_user_provider:
@@ -8,20 +10,34 @@ security:
                 property: email
 
     firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        # Lexik JWT fires on POST /api/auth/login automatically via json_login
         login:
-            pattern: ^/api/login
+            pattern: ^/api/auth/login$
             stateless: true
             json_login:
-                check_path: /api/login
+                check_path: /api/auth/login
                 provider: app_user_provider
                 username_path: email
                 password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
+        # All other /api routes require a valid JWT
         api:
             pattern: ^/api
             stateless: true
-            jwt: ~           # ✅ This works because Lexik JWT bundle is installed
+            jwt: ~
 
     access_control:
-        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # Public auth endpoints
+        - { path: ^/api/auth/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/register$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/forgot-password$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/reset-password$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/social$, roles: PUBLIC_ACCESS }
+        # Everything else under /api requires authentication
         - { path: ^/api, roles: ROLE_USER }
