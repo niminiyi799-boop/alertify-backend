@@ -3,16 +3,12 @@
 # ============================================================
 FROM composer:2 AS vendor
 
-# Ensure zip + unzip are available
-RUN apk add --no-cache unzip zip libzip-dev \
-    && docker-php-ext-install zip
-
 WORKDIR /app
 
 COPY composer.json composer.lock ./
 
 # Install prod dependencies only (no scripts — full app not present yet)
-RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
+RUN composer install \
     --no-dev \
     --no-scripts \
     --no-interaction \
@@ -73,10 +69,8 @@ RUN mkdir -p config/jwt \
 # Warm up the Symfony cache at build time
 RUN APP_ENV=prod php bin/console cache:warmup --no-debug
 
-# Copy and set entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+EXPOSE 8080
 
-EXPOSE 8000
+# Use environment variable expansion with sh
+CMD sh -c 'php -S 0.0.0.0:${PORT:-8080} -t public'
 
-ENTRYPOINT ["docker-entrypoint.sh"]
