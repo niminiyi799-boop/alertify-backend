@@ -69,7 +69,8 @@ RUN mkdir -p config/jwt \
 # Warm up the Symfony cache at build time
 RUN APP_ENV=prod php bin/console cache:warmup --no-debug
 
-EXPOSE 8000
+EXPOSE 8080
 
-# Use PORT env var (Railway injects it); fall back to 8000
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8000} -t public"]
+# Use environment variable expansion with sh
+CMD sh -c 'php -S 0.0.0.0:${PORT:-8080} -t public'
+
