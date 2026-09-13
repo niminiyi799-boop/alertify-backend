@@ -3,7 +3,7 @@
 # ============================================================
 FROM composer:2 AS vendor
 
-# Ensure zip + unzip are available (composer:2 is Alpine-based)
+# Ensure zip + unzip are available
 RUN apk add --no-cache unzip zip libzip-dev \
     && docker-php-ext-install zip
 
@@ -73,7 +73,10 @@ RUN mkdir -p config/jwt \
 # Warm up the Symfony cache at build time
 RUN APP_ENV=prod php bin/console cache:warmup --no-debug
 
+# Copy and set entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 8000
 
-# Use PORT env var (Railway injects it); fall back to 8000
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8000} -t public"]
+ENTRYPOINT ["docker-entrypoint.sh"]
