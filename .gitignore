@@ -27,3 +27,4 @@
 /public/uploads/media/*
 !/public/uploads/media/.gitkeep
 ###< alertify ###
+/vendor/
