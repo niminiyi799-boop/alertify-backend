@@ -12,26 +12,27 @@
 3. [File Structure](#3-file-structure)
 4. [Navigation Flow](#4-navigation-flow)
 5. [Authentication Module](#5-authentication-module)
-   - [Splash Screen](#51-splash-screen)
-   - [Onboarding Screen](#52-onboarding-screen)
-   - [Login Screen](#53-login-screen)
-   - [Register Screen](#54-register-screen)
+    - [Splash Screen](#51-splash-screen)
+    - [Onboarding Screen](#52-onboarding-screen)
+    - [Login Screen](#53-login-screen)
+    - [Register Screen](#54-register-screen)
 6. [Main App Module](#6-main-app-module)
-   - [Map Screen](#61-map-screen)
-   - [App Header](#62-app-header)
-   - [Filter Dropdown](#63-filter-dropdown)
+    - [Map Screen](#61-map-screen)
+    - [App Header](#62-app-header)
+    - [Filter Dropdown](#63-filter-dropdown)
 7. [Sheets (Push-up Modals)](#7-sheets-push-up-modals)
-   - [Profile & Settings Sheet](#71-profile--settings-sheet)
-   - [Notifications & Settings Sheet](#72-notifications--settings-sheet)
-   - [Create Alert Sheet](#73-create-alert-sheet)
-   - [Success Toast](#74-success-toast)
+    - [Profile & Settings Sheet](#71-profile--settings-sheet)
+    - [Notifications & Settings Sheet](#72-notifications--settings-sheet)
+    - [Create Alert Sheet](#73-create-alert-sheet)
+    - [Success Toast](#74-success-toast)
 8. [Shared Components](#8-shared-components)
-   - [BottomSheet](#81-bottomsheet)
-   - [AlertMap](#82-alertmap)
+    - [BottomSheet](#81-bottomsheet)
+    - [AlertMap](#82-alertmap)
 9. [Data Models](#9-data-models)
 10. [Required API Endpoints](#10-required-api-endpoints)
-11. [Auth Strategy](#11-auth-strategy)
-12. [Alert Categories Reference](#12-alert-categories-reference)
+11. [Real-Time Location (Mercure)](#11-real-time-location-mercure)
+12. [Auth Strategy](#12-auth-strategy)
+13. [Alert Categories Reference](#13-alert-categories-reference)
 
 ---
 
@@ -53,17 +54,17 @@ Authentication is JWT-based (Bearer token).
 
 ## 2. Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Mobile Framework | React Native 0.85 + Expo SDK 56 |
-| Routing | expo-router (file-based, Stack navigator) |
-| Language | TypeScript |
-| State | Local `useState` per screen — no global store yet |
-| Animations | React Native `Animated` API (native driver) |
-| Maps | Placeholder (swap in `react-native-maps` + Google Maps API) |
-| Backend | Symfony PHP (REST API, JSON) |
-| Auth | JWT Bearer token |
-| Media Upload | Multipart form-data |
+| Layer            | Technology                                                  |
+| ---------------- | ----------------------------------------------------------- |
+| Mobile Framework | React Native 0.85 + Expo SDK 56                             |
+| Routing          | expo-router (file-based, Stack navigator)                   |
+| Language         | TypeScript                                                  |
+| State            | Local `useState` per screen — no global store yet           |
+| Animations       | React Native `Animated` API (native driver)                 |
+| Maps             | Placeholder (swap in `react-native-maps` + Google Maps API) |
+| Backend          | Symfony PHP (REST API, JSON)                                |
+| Auth             | JWT Bearer token                                            |
+| Media Upload     | Multipart form-data                                         |
 
 ---
 
@@ -119,6 +120,7 @@ src/
 ```
 
 **On boot:** The splash screen currently navigates manually. When the backend is ready, replace the `useEffect` in `src/app/index.tsx` with an async auth-check:
+
 1. Read stored JWT from secure storage
 2. Call `GET /api/auth/me` to validate token
 3. If valid → `router.replace('/(app)')`, else stay on splash
@@ -128,12 +130,13 @@ src/
 ## 5. Authentication Module
 
 ### 5.1 Splash Screen
+
 **File:** `src/app/index.tsx`
 
-| Element | Action |
-|---|---|
+| Element              | Action                       |
+| -------------------- | ---------------------------- |
 | "Get started" button | `router.push('/onboarding')` |
-| "Login" button | `router.push('/auth/login')` |
+| "Login" button       | `router.push('/auth/login')` |
 
 **Backend hook needed:**
 On mount, check for a stored JWT. If valid, skip splash and redirect to `/(app)`.
@@ -149,39 +152,41 @@ Authorization: Bearer <token>
 ---
 
 ### 5.2 Onboarding Screen
+
 **File:** `src/app/onboarding.tsx`
 
 Pure UI — no API calls. Shows 3 feature slides in a horizontal `FlatList` with pagination dots.
 
-| Function | Description |
-|---|---|
-| `handleNext()` | Advances to the next slide. On the last slide, navigates to `/auth/login` |
+| Function                 | Description                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| `handleNext()`           | Advances to the next slide. On the last slide, navigates to `/auth/login`      |
 | `onViewableItemsChanged` | FlatList callback that updates `activeIndex` state to drive the dot indicators |
 
 **Slides content (static):**
 
-| # | Title | Description |
-|---|---|---|
-| 1 | Real-Time Map Feed | Filter live incidents by category on a map |
-| 2 | Create & Validate Alerts | Report incidents and validate community alerts |
-| 3 | Instant SOS | Long-press SOS to alert emergency contacts |
+| #   | Title                    | Description                                    |
+| --- | ------------------------ | ---------------------------------------------- |
+| 1   | Real-Time Map Feed       | Filter live incidents by category on a map     |
+| 2   | Create & Validate Alerts | Report incidents and validate community alerts |
+| 3   | Instant SOS              | Long-press SOS to alert emergency contacts     |
 
 ---
 
 ### 5.3 Login Screen
+
 **File:** `src/app/auth/login.tsx`
 
 **Local state:**
 
-| State | Type | Description |
-|---|---|---|
-| `email` | `string` | Controlled input for user email |
-| `password` | `string` | Controlled input for password |
+| State          | Type      | Description                                 |
+| -------------- | --------- | ------------------------------------------- |
+| `email`        | `string`  | Controlled input for user email             |
+| `password`     | `string`  | Controlled input for password               |
 | `showPassword` | `boolean` | Toggles `secureTextEntry` on password field |
 
 **Functions:**
 
-#### `handleLogin()` *(to be implemented — currently calls `router.replace('/(app)')`)*
+#### `handleLogin()` _(to be implemented — currently calls `router.replace('/(app)')`)_
 
 Submits credentials to the backend.
 
@@ -239,23 +244,25 @@ POST /api/auth/forgot-password
 ---
 
 ### 5.4 Register Screen
+
 **File:** `src/app/auth/register.tsx`
 
 **Local state:**
 
-| State | Type | Description |
-|---|---|---|
-| `email` | `string` | User email |
-| `password` | `string` | Password |
-| `confirmPassword` | `string` | Client-side match validation only |
-| `showPassword` | `boolean` | Toggles password visibility |
-| `showConfirm` | `boolean` | Toggles confirm password visibility |
+| State             | Type      | Description                         |
+| ----------------- | --------- | ----------------------------------- |
+| `email`           | `string`  | User email                          |
+| `password`        | `string`  | Password                            |
+| `confirmPassword` | `string`  | Client-side match validation only   |
+| `showPassword`    | `boolean` | Toggles password visibility         |
+| `showConfirm`     | `boolean` | Toggles confirm password visibility |
 
 **Client-side validation:**
+
 - If `confirmPassword !== password` and both have content, shows inline error text "Passwords don't match"
 - Submit button is currently enabled regardless (add disabled check when wiring API)
 
-#### `handleRegister()` *(to be implemented — currently calls `router.replace('/(app)')`)*
+#### `handleRegister()` _(to be implemented — currently calls `router.replace('/(app)')`)_
 
 ```
 POST /api/auth/register
@@ -295,25 +302,28 @@ Content-Type: application/json
 ## 6. Main App Module
 
 ### 6.1 Map Screen
+
 **File:** `src/app/(app)/index.tsx`
 
 This is the authenticated root. It renders the map full-screen and layers all UI elements on top via an absolutely positioned overlay.
 
 **Local state:**
 
-| State | Type | Default | Description |
-|---|---|---|---|
-| `profileOpen` | `boolean` | `false` | Controls Profile sheet visibility |
-| `notifOpen` | `boolean` | `false` | Controls Notifications sheet visibility |
-| `createOpen` | `boolean` | `false` | Controls Create Alert sheet visibility |
-| `toastVisible` | `boolean` | `false` | Controls Success toast visibility |
-| `filterOpen` | `boolean` | `false` | Controls filter dropdown open/close |
-| `activeFilter` | `string` | `"All"` | The currently selected alert category filter |
+| State          | Type      | Default | Description                                  |
+| -------------- | --------- | ------- | -------------------------------------------- |
+| `profileOpen`  | `boolean` | `false` | Controls Profile sheet visibility            |
+| `notifOpen`    | `boolean` | `false` | Controls Notifications sheet visibility      |
+| `createOpen`   | `boolean` | `false` | Controls Create Alert sheet visibility       |
+| `toastVisible` | `boolean` | `false` | Controls Success toast visibility            |
+| `filterOpen`   | `boolean` | `false` | Controls filter dropdown open/close          |
+| `activeFilter` | `string`  | `"All"` | The currently selected alert category filter |
 
 **Functions:**
 
 #### `handleAlertSaved()`
+
 Called by `CreateAlertSheet` after a successful alert save.
+
 1. Closes the Create Alert sheet (`setCreateOpen(false)`)
 2. Shows the success toast (`setToastVisible(true)`)
 3. Auto-hides the toast after 3000ms (`setTimeout`)
@@ -348,16 +358,18 @@ The `activeFilter` value should be passed as the `filter` query param. `"All"` m
 ---
 
 ### 6.2 App Header
+
 **File:** `src/components/alertify/app-header.tsx`
 
 **Props:**
 
-| Prop | Type | Description |
-|---|---|---|
-| `onProfilePress` | `() => void` | Opens the Profile sheet |
-| `onNotifPress` | `() => void` | Opens the Notifications sheet |
+| Prop             | Type         | Description                   |
+| ---------------- | ------------ | ----------------------------- |
+| `onProfilePress` | `() => void` | Opens the Profile sheet       |
+| `onNotifPress`   | `() => void` | Opens the Notifications sheet |
 
 **UI elements:**
+
 - **Logo** — static branding (no action)
 - **Bell icon** — has a red unread badge dot. When wired up, the badge should show/hide based on unread notification count from the API
 - **Avatar circle** — shows the user's initial. When wired up, display `avatar_url` image if present
@@ -373,29 +385,31 @@ Authorization: Bearer <token>
 ---
 
 ### 6.3 Filter Dropdown
+
 **File:** `src/components/alertify/filter-dropdown.tsx`
 
 **Props:**
 
-| Prop | Type | Description |
-|---|---|---|
-| `value` | `string` | Currently active filter value |
-| `open` | `boolean` | Whether the dropdown is expanded |
-| `onToggle` | `() => void` | Called when the pill is tapped |
+| Prop       | Type                      | Description                       |
+| ---------- | ------------------------- | --------------------------------- |
+| `value`    | `string`                  | Currently active filter value     |
+| `open`     | `boolean`                 | Whether the dropdown is expanded  |
+| `onToggle` | `() => void`              | Called when the pill is tapped    |
 | `onSelect` | `(value: string) => void` | Called when a menu item is tapped |
 
 **Available filter options:**
 
-| Value | Emoji | Maps to API `category` param |
-|---|---|---|
-| `All` | 🗺️ | *(no filter)* |
-| `Crime` | 🔫 | `"Crime"` |
-| `Accident` | 🚗 | `"Accident"` |
-| `Attack` | ⚡ | `"Attack"` |
-| `Missing Person` | 🧍 | `"Missing Person"` |
-| `Fire` | 🔥 | `"Fire"` |
+| Value            | Emoji | Maps to API `category` param |
+| ---------------- | ----- | ---------------------------- |
+| `All`            | 🗺️    | _(no filter)_                |
+| `Crime`          | 🔫    | `"Crime"`                    |
+| `Accident`       | 🚗    | `"Accident"`                 |
+| `Attack`         | ⚡    | `"Attack"`                   |
+| `Missing Person` | 🧍    | `"Missing Person"`           |
+| `Fire`           | 🔥    | `"Fire"`                     |
 
 When a filter is selected the map should re-fetch alerts with the new category. Pass to:
+
 ```
 GET /api/alerts?category=Crime&lat=...&lng=...&radius=...
 ```
@@ -409,24 +423,26 @@ All sheets use the shared `BottomSheet` base component (see [section 8.1](#81-bo
 ---
 
 ### 7.1 Profile & Settings Sheet
+
 **File:** `src/components/alertify/profile-sheet.tsx`
 
 **Props:**
 
-| Prop | Type | Description |
-|---|---|---|
-| `visible` | `boolean` | Controls sheet visibility |
+| Prop      | Type         | Description                                   |
+| --------- | ------------ | --------------------------------------------- |
+| `visible` | `boolean`    | Controls sheet visibility                     |
 | `onClose` | `() => void` | Called when backdrop tapped or Cancel pressed |
 
 **Local state:**
 
-| State | Type | Description |
-|---|---|---|
-| `name` | `string` | User's display name (pre-filled from cached user) |
-| `email` | `string` | User's email (pre-filled) |
-| `emergency` | `string` | Emergency contact phone number |
+| State       | Type     | Description                                       |
+| ----------- | -------- | ------------------------------------------------- |
+| `name`      | `string` | User's display name (pre-filled from cached user) |
+| `email`     | `string` | User's email (pre-filled)                         |
+| `emergency` | `string` | Emergency contact phone number                    |
 
 **Displayed data (read from backend user object):**
+
 - Avatar initial (first letter of name)
 - Full name
 - Trust Score (e.g., `28`)
@@ -434,7 +450,7 @@ All sheets use the shared `BottomSheet` base component (see [section 8.1](#81-bo
 
 **Functions:**
 
-#### `handleSave()` *(to be implemented — currently calls `onClose()`)*
+#### `handleSave()` _(to be implemented — currently calls `onClose()`)_
 
 ```
 PATCH /api/user/profile
@@ -471,41 +487,44 @@ Content-Type: application/json
 ---
 
 ### 7.2 Notifications & Settings Sheet
+
 **File:** `src/components/alertify/notifications-sheet.tsx`
 
 **Props:**
 
-| Prop | Type | Description |
-|---|---|---|
-| `visible` | `boolean` | Controls sheet visibility |
-| `onClose` | `() => void` | Closes the sheet |
+| Prop      | Type         | Description               |
+| --------- | ------------ | ------------------------- |
+| `visible` | `boolean`    | Controls sheet visibility |
+| `onClose` | `() => void` | Closes the sheet          |
 
 **Local state:**
 
-| State | Type | Default | Description |
-|---|---|---|---|
-| `radius` | `number` | `5` | Alert radius in km (options: 1, 5, 10, 25, 50) |
-| `nightMode` | `boolean` | `false` | Suppress notifications during sleep hours |
-| `enabledCategories` | `Record<string, boolean>` | See below | Which alert categories notify the user |
+| State               | Type                      | Default   | Description                                    |
+| ------------------- | ------------------------- | --------- | ---------------------------------------------- |
+| `radius`            | `number`                  | `5`       | Alert radius in km (options: 1, 5, 10, 25, 50) |
+| `nightMode`         | `boolean`                 | `false`   | Suppress notifications during sleep hours      |
+| `enabledCategories` | `Record<string, boolean>` | See below | Which alert categories notify the user         |
 
 **Default `enabledCategories`:**
+
 ```json
 {
-  "Crime": true,
-  "Accident": true,
-  "Fire": false,
-  "Missing Person": true,
-  "Attack": false
+    "Crime": true,
+    "Accident": true,
+    "Fire": false,
+    "Missing Person": true,
+    "Attack": false
 }
 ```
 
 **Functions:**
 
 #### `toggleCategory(cat: string)`
+
 Flips the boolean for the given category in `enabledCategories`.
 No API call yet — called live on each chip press.
 
-#### `handleSave()` *(to be implemented — currently calls `onClose()`)*
+#### `handleSave()` _(to be implemented — currently calls `onClose()`)_
 
 ```
 PATCH /api/user/notification-settings
@@ -540,29 +559,32 @@ Authorization: Bearer <token>
 ---
 
 ### 7.3 Create Alert Sheet
+
 **File:** `src/components/alertify/create-alert-sheet.tsx`
 
 **Props:**
 
-| Prop | Type | Description |
-|---|---|---|
-| `visible` | `boolean` | Controls sheet visibility |
-| `onClose` | `() => void` | Closes without saving |
-| `onSave` | `() => void` | Called after a successful API save |
+| Prop      | Type         | Description                        |
+| --------- | ------------ | ---------------------------------- |
+| `visible` | `boolean`    | Controls sheet visibility          |
+| `onClose` | `() => void` | Closes without saving              |
+| `onSave`  | `() => void` | Called after a successful API save |
 
 **Local state:**
 
-| State | Type | Default | Description |
-|---|---|---|---|
-| `category` | `string` | `""` | Alert category (from chips or free text) |
-| `location` | `string` | `"Using current GPS location"` | Location string or coordinates |
-| `description` | `string` | `""` | Free-text description of the incident |
-| `visibility` | `"Pack" \| "Public"` | `"Public"` | Who can see the alert |
+| State         | Type                 | Default                        | Description                              |
+| ------------- | -------------------- | ------------------------------ | ---------------------------------------- |
+| `category`    | `string`             | `""`                           | Alert category (from chips or free text) |
+| `location`    | `string`             | `"Using current GPS location"` | Location string or coordinates           |
+| `description` | `string`             | `""`                           | Free-text description of the incident    |
+| `visibility`  | `"Pack" \| "Public"` | `"Public"`                     | Who can see the alert                    |
 
 **Functions:**
 
 #### `handleSave()`
+
 Current behaviour:
+
 1. Calls `onSave()` prop (which triggers the success toast on the map screen)
 2. Resets `category`, `description`, `visibility` to defaults
 
@@ -614,23 +636,24 @@ Content-Type: multipart/form-data
 
 **Visibility values:**
 
-| UI Label | API value |
-|---|---|
-| `Pack` | `"pack"` — visible only to the user's trusted contacts |
-| `Public` | `"public"` — visible to all users within radius |
+| UI Label | API value                                              |
+| -------- | ------------------------------------------------------ |
+| `Pack`   | `"pack"` — visible only to the user's trusted contacts |
+| `Public` | `"public"` — visible to all users within radius        |
 
 ---
 
 ### 7.4 Success Toast
+
 **File:** `src/components/alertify/success-toast.tsx`
 
 **Props:**
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `visible` | `boolean` | — | Controls show/hide with animation |
-| `message` | `string` | — | Message text displayed next to the check icon |
-| `bottomInset` | `number` | `0` | Safe area bottom offset so toast clears the home indicator |
+| Prop          | Type      | Default | Description                                                |
+| ------------- | --------- | ------- | ---------------------------------------------------------- |
+| `visible`     | `boolean` | —       | Controls show/hide with animation                          |
+| `message`     | `string`  | —       | Message text displayed next to the check icon              |
+| `bottomInset` | `number`  | `0`     | Safe area bottom offset so toast clears the home indicator |
 
 No API interaction. Purely presentational. Slides up with a spring animation when `visible` becomes `true` and slides back down when `false`.
 
@@ -641,21 +664,23 @@ Current message: `"Your alert has been posted to the map."`
 ## 8. Shared Components
 
 ### 8.1 BottomSheet
+
 **File:** `src/components/alertify/bottom-sheet.tsx`
 
 Reusable animated push-up modal. Used by all three sheets.
 
 **Props:**
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `visible` | `boolean` | — | Controls open/close with animation |
-| `onClose` | `() => void` | — | Called when the backdrop is tapped or Android back is pressed |
-| `children` | `React.ReactNode` | — | Sheet content |
-| `heightFraction` | `number` | `0.82` | Sheet height as a fraction of screen height (0.0–1.0) |
-| `style` | `ViewStyle` | — | Optional extra styles on the sheet container |
+| Prop             | Type              | Default | Description                                                   |
+| ---------------- | ----------------- | ------- | ------------------------------------------------------------- |
+| `visible`        | `boolean`         | —       | Controls open/close with animation                            |
+| `onClose`        | `() => void`      | —       | Called when the backdrop is tapped or Android back is pressed |
+| `children`       | `React.ReactNode` | —       | Sheet content                                                 |
+| `heightFraction` | `number`          | `0.82`  | Sheet height as a fraction of screen height (0.0–1.0)         |
+| `style`          | `ViewStyle`       | —       | Optional extra styles on the sheet container                  |
 
 **Animation behaviour:**
+
 - Open: `translateY` goes from `sheetHeight` → `0` over 320ms with `Easing.out(cubic)`. Backdrop fades in over 280ms.
 - Close: `translateY` goes from `0` → `sheetHeight` over 260ms with `Easing.in(cubic)`. Backdrop fades out over 220ms.
 - Both use the native animation driver (`useNativeDriver: true`).
@@ -663,19 +688,21 @@ Reusable animated push-up modal. Used by all three sheets.
 ---
 
 ### 8.2 AlertMap
+
 **File:** `src/components/alertify/alert-map.tsx`
 
 **Current state:** Static placeholder rendering fake roads, place labels, and hardcoded pins.
 
 **Props:**
 
-| Prop | Type | Description |
-|---|---|---|
+| Prop           | Type     | Description                                                         |
+| -------------- | -------- | ------------------------------------------------------------------- |
 | `activeFilter` | `string` | The selected category filter — not yet used to filter the mock pins |
 
 **Replacing with `react-native-maps`:**
 
 When integrating real maps:
+
 1. Install: `npx expo install react-native-maps`
 2. Replace `AlertMap` internals with a `<MapView>` component set to dark mode (`customMapStyle`)
 3. Render `<Marker>` components for each alert from the API
@@ -684,11 +711,11 @@ When integrating real maps:
 
 **Pin types:**
 
-| `type` | Visual | Meaning |
-|---|---|---|
+| `type`              | Visual                           | Meaning                      |
+| ------------------- | -------------------------------- | ---------------------------- |
 | `"warning"` (large) | Large red circle with pulse ring | High-severity / recent alert |
-| `"warning"` (small) | Small bordered circle | Standard alert |
-| `"pin"` | Map pin emoji | User location or POI |
+| `"warning"` (small) | Small bordered circle            | Standard alert               |
+| `"pin"`             | Map pin emoji                    | User location or POI         |
 
 ---
 
@@ -698,46 +725,46 @@ These are the TypeScript interfaces the frontend expects. Match your Symfony ser
 
 ```typescript
 interface User {
-  id: number;
-  name: string | null;
-  email: string;
-  trust_score: number;
-  contribution_count: number;
-  avatar_url: string | null;
-  emergency_contact: string | null;
+    id: number;
+    name: string | null;
+    email: string;
+    trust_score: number;
+    contribution_count: number;
+    avatar_url: string | null;
+    emergency_contact: string | null;
 }
 
 interface Alert {
-  id: string;             // UUID
-  category: AlertCategory;
-  description: string;
-  lat: number;
-  lng: number;
-  visibility: 'public' | 'pack';
-  created_at: string;     // ISO 8601
-  user: Pick<User, 'id' | 'name' | 'trust_score'>;
-  media: string[];        // array of CDN URLs
-  validation_count: number;
+    id: string; // UUID
+    category: AlertCategory;
+    description: string;
+    lat: number;
+    lng: number;
+    visibility: "public" | "pack";
+    created_at: string; // ISO 8601
+    user: Pick<User, "id" | "name" | "trust_score">;
+    media: string[]; // array of CDN URLs
+    validation_count: number;
 }
 
 interface NotificationSettings {
-  alert_radius_km: number;
-  night_mode: boolean;
-  enabled_categories: AlertCategory[];
+    alert_radius_km: number;
+    night_mode: boolean;
+    enabled_categories: AlertCategory[];
 }
 
 interface AuthResponse {
-  token: string;
-  user: User;
+    token: string;
+    user: User;
 }
 
 type AlertCategory =
-  | 'Crime'
-  | 'Accident'
-  | 'Fire'
-  | 'Missing Person'
-  | 'Attack'
-  | 'Other';
+    | "Crime"
+    | "Accident"
+    | "Fire"
+    | "Missing Person"
+    | "Attack"
+    | "Other";
 ```
 
 ---
@@ -748,86 +775,249 @@ Complete list of all endpoints the frontend needs, in priority order.
 
 ### Authentication
 
-| Method | Endpoint | Description | Auth required |
-|---|---|---|---|
-| `POST` | `/api/auth/login` | Email + password login, returns JWT + user | No |
-| `POST` | `/api/auth/register` | Create account, returns JWT + user | No |
-| `GET` | `/api/auth/me` | Validate token, returns user object | Yes |
-| `POST` | `/api/auth/logout` | Invalidate token | Yes |
-| `POST` | `/api/auth/forgot-password` | Send reset email | No |
-| `POST` | `/api/auth/reset-password` | Submit new password with reset token | No |
-| `POST` | `/api/auth/social` | OAuth token exchange (Google / Facebook) | No |
+| Method | Endpoint                    | Description                                | Auth required |
+| ------ | --------------------------- | ------------------------------------------ | ------------- |
+| `POST` | `/api/auth/login`           | Email + password login, returns JWT + user | No            |
+| `POST` | `/api/auth/register`        | Create account, returns JWT + user         | No            |
+| `GET`  | `/api/auth/me`              | Validate token, returns user object        | Yes           |
+| `POST` | `/api/auth/logout`          | Invalidate token                           | Yes           |
+| `POST` | `/api/auth/forgot-password` | Send reset email                           | No            |
+| `POST` | `/api/auth/reset-password`  | Submit new password with reset token       | No            |
+| `POST` | `/api/auth/social`          | OAuth token exchange (Google / Facebook)   | No            |
 
 ### Alerts
 
-| Method | Endpoint | Description | Auth required |
-|---|---|---|---|
-| `GET` | `/api/alerts` | Fetch alerts (filter by category, lat, lng, radius) | Yes |
-| `POST` | `/api/alerts` | Create new alert (multipart for media) | Yes |
-| `GET` | `/api/alerts/{id}` | Get single alert detail | Yes |
-| `POST` | `/api/alerts/{id}/validate` | Upvote/validate an alert | Yes |
-| `DELETE` | `/api/alerts/{id}` | Delete own alert | Yes |
+| Method   | Endpoint                    | Description                                         | Auth required |
+| -------- | --------------------------- | --------------------------------------------------- | ------------- |
+| `GET`    | `/api/alerts`               | Fetch alerts (filter by category, lat, lng, radius) | Yes           |
+| `POST`   | `/api/alerts`               | Create new alert (multipart for media)              | Yes           |
+| `GET`    | `/api/alerts/{id}`          | Get single alert detail                             | Yes           |
+| `POST`   | `/api/alerts/{id}/validate` | Upvote/validate an alert                            | Yes           |
+| `DELETE` | `/api/alerts/{id}`          | Delete own alert                                    | Yes           |
 
 ### User / Profile
 
-| Method | Endpoint | Description | Auth required |
-|---|---|---|---|
-| `PATCH` | `/api/user/profile` | Update name, email, emergency contact | Yes |
-| `GET` | `/api/user/notification-settings` | Fetch notification preferences | Yes |
-| `PATCH` | `/api/user/notification-settings` | Save notification preferences | Yes |
+| Method  | Endpoint                          | Description                           | Auth required |
+| ------- | --------------------------------- | ------------------------------------- | ------------- |
+| `PATCH` | `/api/user/profile`               | Update name, email, emergency contact | Yes           |
+| `GET`   | `/api/user/notification-settings` | Fetch notification preferences        | Yes           |
+| `PATCH` | `/api/user/notification-settings` | Save notification preferences         | Yes           |
 
 ### Notifications
 
-| Method | Endpoint | Description | Auth required |
-|---|---|---|---|
-| `GET` | `/api/notifications` | List recent notifications | Yes |
-| `GET` | `/api/notifications/unread-count` | Count of unread notifications | Yes |
-| `POST` | `/api/notifications/mark-read` | Mark all as read | Yes |
+| Method | Endpoint                          | Description                   | Auth required |
+| ------ | --------------------------------- | ----------------------------- | ------------- |
+| `GET`  | `/api/notifications`              | List recent notifications     | Yes           |
+| `GET`  | `/api/notifications/unread-count` | Count of unread notifications | Yes           |
+| `POST` | `/api/notifications/mark-read`    | Mark all as read              | Yes           |
 
 ### Media
 
-| Method | Endpoint | Description | Auth required |
-|---|---|---|---|
-| `POST` | `/api/media/upload` | Upload media file, returns CDN URL | Yes |
+| Method | Endpoint            | Description                        | Auth required |
+| ------ | ------------------- | ---------------------------------- | ------------- |
+| `POST` | `/api/media/upload` | Upload media file, returns CDN URL | Yes           |
+
+### Real-Time Location
+
+| Method | Endpoint                        | Description                                   | Auth required |
+| ------ | ------------------------------- | --------------------------------------------- | ------------- |
+| `POST` | `/api/update-location`          | Send current GPS position (call every 5 min)  | Yes           |
+| `GET`  | `/api/location/subscribe-token` | Get a Mercure subscriber JWT + connection URL | Yes           |
 
 ---
 
-## 11. Auth Strategy
+## 11. Real-Time Location (Mercure)
+
+The backend uses **Mercure** for real-time location updates. Mercure is a WebSocket/SSE protocol — the mobile app opens a persistent connection and receives location pushes instantly without polling.
+
+### How it works
+
+```
+Mobile App ──POST /api/update-location (every 5 min)──► Symfony API
+                                                              │
+                                                    saves to DB + publishes
+                                                              │
+                                                              ▼
+Mobile App ◄──EventSource / WebSocket (persistent)─── Mercure Hub
+             topic: alertify/location/{userId}
+```
+
+1. On login, call `GET /api/location/subscribe-token` to get a subscriber JWT and the Mercure hub URL.
+2. Open a persistent `EventSource` connection to the hub.
+3. Every 5 minutes, call `POST /api/update-location` with the device's current coordinates.
+4. The backend saves the location and publishes it to the hub — all subscribers on that topic receive the update in real time.
+
+---
+
+### Step 1 — Get subscriber token
+
+```
+GET /api/location/subscribe-token
+Authorization: Bearer <jwt>
+
+→ 200:
+{
+  "token": "<mercure-subscriber-jwt>",
+  "mercure_url": "https://<railway-domain>/.well-known/mercure",
+  "topic": "alertify/location/42"
+}
+```
+
+Call this once after login. The token is valid for **6 hours** — refresh it before it expires.
+
+---
+
+### Step 2 — Open the Mercure EventSource
+
+```typescript
+import EventSource from "react-native-sse"; // or browser EventSource on web
+
+async function subscribeToLocation(api) {
+    const { token, mercure_url, topic } = await api.get(
+        "/api/location/subscribe-token",
+    );
+
+    const url = new URL(mercure_url);
+    url.searchParams.append("topic", topic);
+
+    const es = new EventSource(url.toString(), {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+
+    es.addEventListener("message", (event) => {
+        const { user_id, latitude, longitude, address, updated_at } =
+            JSON.parse(event.data);
+        // → update the map marker for this user
+    });
+
+    es.addEventListener("error", (err) => {
+        // reconnect logic here
+        console.error("Mercure error", err);
+    });
+
+    return es; // keep reference to close it on logout / unmount
+}
+```
+
+For **React Native**, install: `npx expo install react-native-sse`  
+For **web/browser**, the native `EventSource` API works without any extra package.
+
+---
+
+### Step 3 — Send location updates every 5 minutes
+
+```typescript
+import * as Location from "expo-location";
+
+async function startLocationTracking(api) {
+    // Ask for permission once
+    await Location.requestForegroundPermissionsAsync();
+
+    const sendLocation = async () => {
+        const { coords } = await Location.getCurrentPositionAsync({});
+        await api.post("/api/update-location", {
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+        });
+    };
+
+    // Send immediately then every 5 minutes
+    sendLocation();
+    return setInterval(sendLocation, 5 * 60 * 1000);
+}
+```
+
+Install: `npx expo install expo-location`
+
+---
+
+### Step 4 — Cleanup on logout
+
+```typescript
+// Close the EventSource and stop the interval
+es.close();
+clearInterval(locationInterval);
+```
+
+---
+
+### Message payload (received from Mercure)
+
+```typescript
+interface LocationUpdate {
+    user_id: number;
+    latitude: number;
+    longitude: number;
+    address: string; // reverse-geocoded, empty string if not configured
+    updated_at: string; // ISO 8601
+}
+```
+
+---
+
+### POST /api/update-location — request/response
+
+```
+POST /api/update-location
+Authorization: Bearer <jwt>
+Content-Type: application/json
+
+{ "latitude": 6.5244, "longitude": 3.3792 }
+
+→ 200:
+{
+  "status": "success",
+  "data": {
+    "latitude": 6.5244,
+    "longitude": 3.3792,
+    "address": "Lagos, Nigeria"
+  }
+}
+
+→ 400: { "status": "error", "message": "Missing latitude or longitude" }
+```
+
+---
+
+## 12. Auth Strategy
 
 **Token storage:** Use `expo-secure-store` on native (`SecureStore.setItemAsync('jwt', token)`). On web, use `localStorage` (or `sessionStorage`).
 
 **Request headers:** Every authenticated request must include:
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Content-Type: application/json
 ```
 
 **Token expiry handling:**
+
 - If any API call returns `401`, clear the stored token and redirect to `/auth/login`
 - Optionally implement silent refresh using a refresh token endpoint
 
 **Recommended Symfony packages:**
+
 - `lexik/jwt-authentication-bundle` for JWT generation and validation
 - `gesdinet/jwt-refresh-token-bundle` for refresh tokens
 
 ---
 
-## 12. Alert Categories Reference
+## 13. Alert Categories Reference
 
 These are the exact string values used in both the frontend UI and expected in API payloads. They must match exactly (case-sensitive).
 
-| Value | UI Label | Filter Icon |
-|---|---|---|
-| `"Crime"` | Crime | 🔫 |
-| `"Accident"` | Accident | 🚗 |
-| `"Attack"` | Attack | ⚡ |
-| `"Missing Person"` | Missing Person | 🧍 |
-| `"Fire"` | Fire | 🔥 |
-| `"Other"` | Other | *(create form only)* |
+| Value              | UI Label       | Filter Icon          |
+| ------------------ | -------------- | -------------------- |
+| `"Crime"`          | Crime          | 🔫                   |
+| `"Accident"`       | Accident       | 🚗                   |
+| `"Attack"`         | Attack         | ⚡                   |
+| `"Missing Person"` | Missing Person | 🧍                   |
+| `"Fire"`           | Fire           | 🔥                   |
+| `"Other"`          | Other          | _(create form only)_ |
 
 The `"All"` option in the filter UI means **no category filter** — do not send it as a category value to the API.
 
 ---
 
-*Last updated: July 26, 2026*
-*Frontend stack: Expo SDK 56 · React Native 0.85 · expo-router 56.2*
+_Last updated: July 26, 2026_
+_Frontend stack: Expo SDK 56 · React Native 0.85 · expo-router 56.2_
