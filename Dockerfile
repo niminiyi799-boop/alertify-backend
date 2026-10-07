@@ -20,7 +20,21 @@ RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
     --optimize-autoloader
 
 # ============================================================
-# Stage 2: Runtime image
+# Stage 2: Download Mercure hub binary
+# ============================================================
+FROM alpine:3.19 AS mercure
+
+RUN apk add --no-cache curl tar
+
+# Mercure v0.16 — latest stable as of 2026
+RUN curl -fsSL \
+    "https://github.com/dunglas/mercure/releases/download/v0.16.3/mercure_Linux_x86_64.tar.gz" \
+    -o /tmp/mercure.tar.gz \
+    && tar -xzf /tmp/mercure.tar.gz -C /usr/local/bin mercure \
+    && chmod +x /usr/local/bin/mercure
+
+# ============================================================
+# Stage 3: Runtime image
 # ============================================================
 FROM php:8.4-cli-alpine AS runtime
 
@@ -51,6 +65,9 @@ RUN { \
         echo 'opcache.save_comments=1'; \
     } > /usr/local/etc/php/conf.d/opcache.ini
 
+# Copy Mercure binary from dedicated stage
+COPY --from=mercure /usr/local/bin/mercure /usr/local/bin/mercure
+
 WORKDIR /app
 
 # 1. Copy application source first
@@ -59,8 +76,8 @@ COPY . .
 # 2. Copy vendor on top (must come AFTER source so it is not overwritten)
 COPY --from=vendor /app/vendor ./vendor
 
-# Create writable directories Symfony needs
-RUN mkdir -p var/cache var/log public/uploads/media \
+# Create writable directories Symfony and Mercure need
+RUN mkdir -p var/cache var/log var/mercure public/uploads/media \
     && chmod -R 777 var public/uploads
 
 # Generate JWT keys if not already present
@@ -77,6 +94,9 @@ RUN APP_ENV=prod php bin/console cache:warmup --no-debug
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+# PHP server port (Railway injects $PORT)
 EXPOSE 8000
+# Mercure hub port
+EXPOSE 3000
 
 ENTRYPOINT ["docker-entrypoint.sh"]
